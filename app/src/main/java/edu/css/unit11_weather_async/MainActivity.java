@@ -12,11 +12,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+/**
+ * @author Tom Gibbons, Chris Killian
+ */
 public class MainActivity extends AppCompatActivity {
-    EditText etLoc;
-    EditText etTemp;
-    EditText etWind;
-    EditText etVis;
+    EditText etLoc; //location
+    EditText etTemp; //temperature
+    EditText etWind; //wind
+    EditText etVis; //visibility
 
     AsyncDownloadXML AsyncWeatherDownloader = new AsyncDownloadXML();
 
@@ -32,24 +35,46 @@ public class MainActivity extends AppCompatActivity {
         etVis =  (EditText) findViewById(R.id.textVis);
     }
 
+    /**
+     * On button click AsyncWeatherDownloader executes.
+     * @param v
+     * @throws XmlPullParserException Signals XML Pull parser related faults.
+     * @throws URISyntaxException Indicates that a string could not be parsed as a URI reference.
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public void btnClick (View v) throws XmlPullParserException, URISyntaxException, IOException {
         // Download the weather asynchronously
         AsyncWeatherDownloader.execute(this);
     }
 
+    /**
+     * Sets etTemp text box based on the data returned from the API.
+     * @param newTemp the temperature data result.
+     */
     public void setTemp(String newTemp) {
         etTemp.setText(newTemp);
     }
 
+    /**
+     * Sets etWind text box based on the data returned from the API.
+     * @param newWind the wind data result.
+     */
     public void setWind(String newWind) {
         etWind.setText(newWind);
     }
 
+    /**
+     * Gets the location/ZIP code.
+     * @return the location in a string format.
+     */
     public String getLocation() {
         return etLoc.getText().toString();
     }
 
-
+    /**
+     * Displays a message of the status of getting the weather data.
+     * @param newStatus the status of the getting the weather data.
+     */
     public void setStatus(String newStatus) {
         Toast toast=Toast.makeText(getApplicationContext(), newStatus,Toast.LENGTH_LONG );
         toast.show();

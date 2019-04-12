@@ -16,82 +16,98 @@ import java.util.Scanner;
 
 import static org.xmlpull.v1.XmlPullParser.TYPES;
 
+/**
+ * @author Tom Gibbons, Chris Killian
+ */
 public class AsyncDownloadXML extends AsyncTask<MainActivity, String, String> {
 
     MainActivity mainActivityLink;
 
-    //Implementation of AsyncTask used to download XML feed
-    // This method is run in a separate thread.  Do not do any UI stuff here.
-    // Calls onPostExecute when done and passes it the return value or String
+    /**
+     * Implementation of AsyncTask used to download XML feed
+     * This method is run in a separate thread.  Do not do any UI stuff here.
+     * Calls onPostExecute when done and passes it the return value or String
+     */
     @Override
     protected String doInBackground(MainActivity... new_actWeather) {
         try {
-            Log.v("== CIS 3334 ==","AsyncDownloadXML doInBackground");
+            Log.v("== CIS 3334 ==", "AsyncDownloadXML doInBackground");
             // Save a pointer to the main Weather Activity which is passed in as a parameter
             mainActivityLink = new_actWeather[0];
+
 
             // create the XML Pull Parser
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser xpp = factory.newPullParser();
 
-            String  weatherStrURL =  "http://api.openweathermap.org/data/2.5/weather?zip=55811,us&appid=5aa6c40803fbb300fe98c6728bdafce7&mode=xml&units=imperial";
-            URL weatherURL =  new URL(weatherStrURL);
+            String weatherStrURL = "http://api.openweathermap.org/data/2.5/weather?zip=" + mainActivityLink.getLocation() + ",us&appid=5aa6c40803fbb300fe98c6728bdafce7&mode=xml&units=imperial";
+            URL weatherURL = new URL(weatherStrURL);
             InputStream stream = weatherURL.openStream();
             xpp.setInput(stream, null);
             int eventType = xpp.getEventType();
 
-            String tempStr = "Updating...";			// Temperature Update String
-            String windStr = "Updating...";			// Wind Update String
-            publishProgress(tempStr,windStr);
+            String tempStr = "Updating...";            // Temperature Update String
+            String windStr = "Updating...";            // Wind Update String
+            publishProgress(tempStr, windStr);
 
-            Log.v("== CIS 3334 ==","AsyncDownloadXML repeat until end of document arrives");
+            Log.v("== CIS 3334 ==", "AsyncDownloadXML repeat until end of document arrives");
             while (eventType != XmlPullParser.END_DOCUMENT) {
-                Log.v("== CIS 3334 ==","AsyncDownloadXML eventType = "+TYPES[eventType]);
+                Log.v("== CIS 3334 ==", "AsyncDownloadXML eventType = " + TYPES[eventType]);
                 // look for a start tag
-                if(eventType == XmlPullParser.START_TAG) {
+                if (eventType == XmlPullParser.START_TAG) {
 
                     // get the tag name and process it
                     String tag = xpp.getName();
-                    Log.v("== CIS 3334 ==","Start tag found with name = "+tag);
-                    if (tag.equals("speed")){
+                    Log.v("== CIS 3334 ==", "Start tag found with name = " + tag);
+                    if (tag.equals("speed")) {
                         // XML should look like: <speed value="11.41" name="Strong breeze"/>
-
-                        // ======= CIS 3334 add code here to process wing speed =======
-
+                        windStr = xpp.getAttributeValue(null, "value");
+                        Log.v("== CIS 3334 ==", "Wind =" + windStr);
+                        publishProgress(tempStr, windStr);
                     }
-                    if (tag.equals("temperature")){
+                    if (tag.equals("temperature")) {
                         // XML should look like: <temperature value="37.47" min="33.8" max="41" unit="fahrenheit"/>
                         tempStr = xpp.getAttributeValue(null, "value");
-                        Log.v("== CIS 3334 ==","Temp =" + tempStr);
-                        publishProgress(tempStr,windStr);	// Update the display
+                        Log.v("== CIS 3334 ==", "Temp =" + tempStr);
+                        publishProgress(tempStr, windStr);    // Update the display
                     }
                 }
                 eventType = xpp.next();
             }
-           return "Successfully updated weather";
+            return "Successfully updated weather";
 
         } catch (IOException e) {
-            Log.v("== CIS 3334 -- ERROR ==","AsyncDownloadXML doInBackground IOException");
-            Log.v("== CIS 3334 -- ERROR ==",e.getMessage());
-            return(e.getMessage());
+            Log.v("== CIS 3334 -- ERROR ==", "AsyncDownloadXML doInBackground IOException");
+            Log.v("== CIS 3334 -- ERROR ==", e.getMessage());
+            return (e.getMessage());
         } catch (XmlPullParserException e) {
-            Log.v("== CIS 3334 -- ERROR ==","AsyncDownloadXML doInBackground XmlPullParserException");
-            Log.v("== CIS 3334 -- ERROR ==",e.getMessage());
-            return(e.getMessage());
-        }  catch (Exception e) {
-            Log.v("== CIS 3334 -- ERROR ==","AsyncDownloadXML doInBackground Exception");
-            Log.v("== CIS 3334 -- ERROR ==",e.getMessage());
-            return(e.getMessage());
+            Log.v("== CIS 3334 -- ERROR ==", "AsyncDownloadXML doInBackground XmlPullParserException");
+            Log.v("== CIS 3334 -- ERROR ==", e.getMessage());
+            return (e.getMessage());
+        } catch (Exception e) {
+            Log.v("== CIS 3334 -- ERROR ==", "AsyncDownloadXML doInBackground Exception");
+            Log.v("== CIS 3334 -- ERROR ==", e.getMessage());
+            return (e.getMessage());
         }
     }
 
+    /**
+     * Used to update the current progress status of task
+     * performed in doInBackground
+     * @param update the progress of the task.
+     */
     @Override
     protected void onProgressUpdate(String... update) {
-        Log.v("== CIS 3334 ==","in onProgressUpdate");
+        Log.v("== CIS 3334 ==", "in onProgressUpdate");
         mainActivityLink.setTemp(update[0]);
         mainActivityLink.setWind(update[1]);
     }
 
+    /**
+     * Delivers the result back to the main UI thread and stops the
+     * AsyncTask process once doInBackground finishes executing the task.
+     * @param result the results of the task.
+     */
     @Override
     protected void onPostExecute(String result) {
         Log.v("== CIS 3334 ==", "in onPostExecute");
@@ -99,5 +115,3 @@ public class AsyncDownloadXML extends AsyncTask<MainActivity, String, String> {
     }
 
 }
-
-
